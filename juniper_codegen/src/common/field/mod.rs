@@ -62,6 +62,8 @@ pub(crate) struct Attr {
     ///
     /// [1]: https://spec.graphql.org/October2021#sec-Language.Fields
     pub(crate) ignore: Option<SpanContainer<syn::Ident>>,
+
+    pub(crate) debug: Option<SpanContainer<syn::Ident>>,
 }
 
 impl Parse for Attr {
@@ -98,6 +100,10 @@ impl Parse for Attr {
                     .ignore
                     .replace(SpanContainer::new(ident.span(), None, ident.clone()))
                     .none_or_else(|_| err::dup_arg(&ident))?,
+                "debug" | "is_debug" => out
+                    .debug
+                    .replace(SpanContainer::new(ident.span(), None, ident.clone()))
+                    .none_or_else(|_| err::dup_arg(&ident))?,
                 name => {
                     return Err(err::unknown_arg(&ident, name));
                 }
@@ -117,6 +123,7 @@ impl Attr {
             description: try_merge_opt!(description: self, another),
             deprecated: try_merge_opt!(deprecated: self, another),
             ignore: try_merge_opt!(ignore: self, another),
+            debug: try_merge_opt!(debug: self, another),
         })
     }
 
@@ -204,6 +211,8 @@ pub(crate) struct Definition {
     ///
     /// [1]: https://spec.graphql.org/October2021#sec-Language.Fields
     pub(crate) is_async: bool,
+
+    pub(crate) is_debug: bool,
 }
 
 impl Definition {

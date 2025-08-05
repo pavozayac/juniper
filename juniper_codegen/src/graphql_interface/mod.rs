@@ -614,6 +614,7 @@ impl Definition {
         let fields_marks = self
             .fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|f| f.method_mark_tokens(false, scalar));
 
         let is_output = self.implemented_for.iter().map(|impler| {
@@ -709,7 +710,11 @@ impl Definition {
             }
         });
 
-        let fields_meta = self.fields.iter().map(|f| f.method_meta_tokens(None));
+        let fields_meta = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| f.method_meta_tokens(None));
 
         quote! {
             #[automatically_derived]
@@ -756,17 +761,21 @@ impl Definition {
         let (impl_generics, _, where_clause) = generics.split_for_impl();
         let (_, ty_generics, _) = self.generics.split_for_impl();
 
-        let fields_resolvers = self.fields.iter().map(|f| {
-            let name = &f.name;
-            Some(quote! {
-                #name => {
-                    ::juniper::macros::reflect::Field::<
-                        #scalar,
-                        { ::juniper::macros::reflect::fnv1a128(#name) }
-                    >::call(self, info, args, executor)
-                }
-            })
-        });
+        let fields_resolvers = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| {
+                let name = &f.name;
+                Some(quote! {
+                    #name => {
+                        ::juniper::macros::reflect::Field::<
+                            #scalar,
+                            { ::juniper::macros::reflect::fnv1a128(#name) }
+                        >::call(self, info, args, executor)
+                    }
+                })
+            });
 
         let no_field_err =
             field::Definition::method_resolve_field_err_no_field_tokens(scalar, trait_name);
@@ -840,17 +849,21 @@ impl Definition {
         let (impl_generics, _, where_clause) = generics.split_for_impl();
         let (_, ty_generics, _) = self.generics.split_for_impl();
 
-        let fields_resolvers = self.fields.iter().map(|f| {
-            let name = &f.name;
-            quote! {
-                #name => {
-                    ::juniper::macros::reflect::AsyncField::<
-                        #scalar,
-                        { ::juniper::macros::reflect::fnv1a128(#name) }
-                    >::call(self, info, args, executor)
+        let fields_resolvers = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| {
+                let name = &f.name;
+                quote! {
+                    #name => {
+                        ::juniper::macros::reflect::AsyncField::<
+                            #scalar,
+                            { ::juniper::macros::reflect::fnv1a128(#name) }
+                        >::call(self, info, args, executor)
+                    }
                 }
-            }
-        });
+            });
         let no_field_err =
             field::Definition::method_resolve_field_err_no_field_tokens(scalar, trait_name);
 
@@ -903,7 +916,11 @@ impl Definition {
         let implements = &self.implements;
         let scalar = &self.scalar;
         let name = &self.name;
-        let fields = self.fields.iter().map(|f| &f.name);
+        let fields = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| &f.name);
 
         let generics = self.impl_generics(false);
         let (impl_generics, _, where_clause) = generics.split_for_impl();
@@ -972,6 +989,7 @@ impl Definition {
 
         self.fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|field| {
                 let field_name = &field.name;
                 let mut return_ty = field.ty.clone();
@@ -1048,6 +1066,7 @@ impl Definition {
 
         self.fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|field| {
                 let field_name = &field.name;
                 let mut return_ty = field.ty.clone();
@@ -1128,6 +1147,7 @@ impl Definition {
 
         self.fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|field| {
                 let field_name = &field.name;
                 let mut return_ty = field.ty.clone();

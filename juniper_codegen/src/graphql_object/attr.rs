@@ -226,6 +226,7 @@ fn parse_field(
         arguments: Some(arguments),
         has_receiver: method.sig.receiver().is_some(),
         is_async: method.sig.asyncness.is_some(),
+        is_debug: attr.debug.is_some(),
     })
 }
 

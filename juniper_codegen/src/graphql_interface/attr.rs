@@ -212,6 +212,7 @@ fn parse_trait_method(
         arguments: Some(arguments),
         has_receiver: method.sig.receiver().is_some(),
         is_async: method.sig.asyncness.is_some(),
+        is_debug: attr.debug.is_some(),
     })
 }
 
@@ -377,6 +378,7 @@ fn parse_struct_field(
         arguments: None,
         has_receiver: false,
         is_async: false,
+        is_debug: attr.debug.is_some(),
     })
 }
 

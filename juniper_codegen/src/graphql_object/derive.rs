@@ -151,5 +151,6 @@ fn parse_field(field: &syn::Field, renaming: &rename::Policy) -> Option<field::D
         arguments: None,
         has_receiver: false,
         is_async: false,
+        is_debug: attr.debug.is_some(),
     })
 }

@@ -340,6 +340,7 @@ impl<Operation: ?Sized + 'static> Definition<Operation> {
         let fields_marks = self
             .fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|f| f.method_mark_tokens(coerce_result, scalar));
 
         let interface_tys = self.interfaces.iter();
@@ -370,7 +371,11 @@ impl<Operation: ?Sized + 'static> Definition<Operation> {
         let name = &self.name;
         let (impl_generics, where_clause) = self.impl_generics(false);
         let ty = &self.ty;
-        let fields = self.fields.iter().map(|f| &f.name);
+        let fields = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| &f.name);
         let interfaces = self.interfaces.iter();
 
         quote! {
@@ -437,6 +442,7 @@ impl<Operation: ?Sized + 'static> Definition<Operation> {
         let fields_meta = self
             .fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|f| f.method_meta_tokens(extract_stream_type.then_some(scalar)));
 
         // Sorting is required to preserve/guarantee the order of interfaces registered in schema.
@@ -560,6 +566,7 @@ impl Definition<Query> {
 
         self.fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|field| {
                 let (name, ty) = (&field.name, field.ty.clone());
 
@@ -619,6 +626,7 @@ impl Definition<Query> {
 
         self.fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|field| {
                 let (name, mut res_ty, ident) = (&field.name, field.ty.clone(), &field.ident);
 
@@ -692,6 +700,7 @@ impl Definition<Query> {
 
         self.fields
             .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
             .map(|field| {
                 let (name, mut res_ty, ident) = (&field.name, field.ty.clone(), &field.ident);
 
@@ -758,17 +767,21 @@ impl Definition<Query> {
 
         let name = &self.name;
 
-        let fields_resolvers = self.fields.iter().map(|f| {
-            let name = &f.name;
-            quote! {
-                #name => {
-                    ::juniper::macros::reflect::Field::<
-                        #scalar,
-                        { ::juniper::macros::reflect::fnv1a128(#name) }
-                    >::call(self, info, args, executor)
+        let fields_resolvers = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| {
+                let name = &f.name;
+                quote! {
+                    #name => {
+                        ::juniper::macros::reflect::Field::<
+                            #scalar,
+                            { ::juniper::macros::reflect::fnv1a128(#name) }
+                        >::call(self, info, args, executor)
+                    }
                 }
-            }
-        });
+            });
 
         let no_field_err =
             field::Definition::method_resolve_field_err_no_field_tokens(scalar, &ty_name);
@@ -825,17 +838,21 @@ impl Definition<Query> {
         let ty = &self.ty;
         let ty_name = ty.to_token_stream().to_string();
 
-        let fields_resolvers = self.fields.iter().map(|f| {
-            let name = &f.name;
-            quote! {
-                #name => {
-                    ::juniper::macros::reflect::AsyncField::<
-                        #scalar,
-                        { ::juniper::macros::reflect::fnv1a128(#name) }
-                    >::call(self, info, args, executor)
+        let fields_resolvers = self
+            .fields
+            .iter()
+            .filter(|f| !f.is_debug || cfg!(debug_assertions))
+            .map(|f| {
+                let name = &f.name;
+                quote! {
+                    #name => {
+                        ::juniper::macros::reflect::AsyncField::<
+                            #scalar,
+                            { ::juniper::macros::reflect::fnv1a128(#name) }
+                        >::call(self, info, args, executor)
+                    }
                 }
-            }
-        });
+            });
 
         let no_field_err =
             field::Definition::method_resolve_field_err_no_field_tokens(scalar, &ty_name);
